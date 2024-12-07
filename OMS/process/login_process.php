@@ -19,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = $username;
             $_SESSION['usertype'] = $usertype;
 
-            if($usertype == 'staff') {
-                header("Location: ../oms_dashboard.php");
+            if($usertype == 'Staff') {
+                header("Location: ../../oms_dashboard.php");
             } elseif($usertype == 'Manager') {
                 header("Location: ../../Inventory/src/dashboard.php");
             } else {
@@ -35,6 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt->close();
-    header("Location: ../forms/login_form.php"); // Redirect back to login form
+    header("Location: ../forms/login_form.php");
     exit;
 }
