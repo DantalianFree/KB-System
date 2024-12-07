@@ -1,3 +1,15 @@
+<?php 
+
+session_start();
+
+if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin') {
+    echo "You don't have access to this page.";
+} else {
+    echo "Welcome manager!";
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
