@@ -1,39 +1,39 @@
 <?php
-include '../conn.php';
-session_start();
+    include '../conn.php';
+    session_start();
 
-// Check if the user is logged in
-if (!isset($_SESSION['usertype'])) {
-    echo "You are not logged in.";
-    exit;
-}
+    // Check if the user is logged in
+    if (!isset($_SESSION['usertype'])) {
+        echo "You are not logged in.";
+        exit;
+    }
 
-// Fetch search and sorting parameters
-$search = isset($_GET['search']) ? trim($_GET['search']) : '';
-$sort = isset($_GET['sort']) ? $_GET['sort'] : 'OrderDate';
-$order = isset($_GET['order']) ? $_GET['order'] : 'DESC';
+    // Fetch search and sorting parameters
+    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'OrderDate';
+    $order = isset($_GET['order']) ? $_GET['order'] : 'DESC';
 
-// Pagination settings
-$limit = 10; // Number of rows per page
-$page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
-$offset = ($page - 1) * $limit;
+    // Pagination settings
+    $limit = 10; // Number of rows per page
+    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
+    $offset = ($page - 1) * $limit;
 
-// Build the query
-$whereClause = $search ? "WHERE OrderID LIKE '%$search%' OR CustomerID LIKE '%$search%'" : '';
-$orderByClause = "ORDER BY $sort $order";
+    // Build the query
+    $whereClause = $search ? "WHERE OrderID LIKE '%$search%' OR CustomerID LIKE '%$search%'" : '';
+    $orderByClause = "ORDER BY $sort $order";
 
-$totalOrdersQuery = "SELECT COUNT(*) as total FROM `order` $whereClause";
-$totalOrders = $conn->query($totalOrdersQuery)->fetch_assoc()['total'];
+    $totalOrdersQuery = "SELECT COUNT(*) as total FROM `order` $whereClause";
+    $totalOrders = $conn->query($totalOrdersQuery)->fetch_assoc()['total'];
 
-$ordersQuery = "SELECT OrderID, CustomerID, OrderDate, TotalAmount 
-                FROM `order` 
-                $whereClause 
-                $orderByClause 
-                LIMIT $limit OFFSET $offset";
-$ordersResult = $conn->query($ordersQuery);
+    $ordersQuery = "SELECT OrderID, CustomerID, OrderDate, TotalAmount 
+                    FROM `order` 
+                    $whereClause 
+                    $orderByClause 
+                    LIMIT $limit OFFSET $offset";
+    $ordersResult = $conn->query($ordersQuery);
 
-// Total pages calculation
-$totalPages = ceil($totalOrders / $limit);
+    // Total pages calculation
+    $totalPages = ceil($totalOrders / $limit);
 ?>
 
 <!DOCTYPE html>
@@ -44,7 +44,6 @@ $totalPages = ceil($totalOrders / $limit);
     <title>Orders List</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Remove table borders and blue color from links */
         table {
             border-collapse: collapse;
         }
@@ -64,8 +63,6 @@ $totalPages = ceil($totalOrders / $limit);
             font-size: 0.8rem;
             margin-left: 5px;
         }
-
-        /* Disable Dashboard button for staff */
         .disabled-button {
             pointer-events: none;
             opacity: 0.5;
@@ -75,23 +72,32 @@ $totalPages = ceil($totalOrders / $limit);
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Order Management</a>
+        <a class="navbar-brand" href="orders_list.php">KB's StopOver OMS</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="order_menu.php">Menu</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="orders_list.php">Order List</a>
+                </li>
+            </ul>
+        </div>
         <div>
-            <!-- Dashboard button for staff with modal trigger -->
+            <!-- Dashboard button para sa staff with modal trigger -->
             <a href="oms_dashboard.php" class="btn btn-secondary btn-sm 
-               <?php echo ($_SESSION['usertype'] == 'Staff') ? 'disabled-button' : ''; ?>"
-               id="dashboardBtn" 
-               <?php echo ($_SESSION['usertype'] == 'Staff') ? 'data-bs-toggle="modal" data-bs-target="#accessDeniedModal"' : ''; ?>>
+                <?php echo ($_SESSION['usertype'] == 'Staff') ? 'disabled-button' : ''; ?>"
+                id="dashboardBtn" 
+                <?php echo ($_SESSION['usertype'] == 'Staff') ? 'data-bs-toggle="modal" data-bs-target="#accessDeniedModal"' : ''; ?>>
                 <?php echo ($_SESSION['usertype'] == 'Staff') ? 'Access Denied' : 'Dashboard'; ?>
             </a>
-            <a href="../src/logout.php" class="btn btn-danger btn-sm">Logout</a>
+            <a href="../../process/log_out.php" class="btn btn-danger btn-sm">Logout</a>
         </div>
     </div>
 </nav>
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">Orders List</h2>
-
     <!-- Search Form -->
     <form method="GET" class="mb-3">
         <div class="input-group">
@@ -99,7 +105,6 @@ $totalPages = ceil($totalOrders / $limit);
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
     </form>
-
     <!-- Orders Table -->
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
@@ -143,7 +148,6 @@ $totalPages = ceil($totalOrders / $limit);
             <?php endif; ?>
         </tbody>
     </table>
-
     <!-- Pagination -->
     <nav>
         <ul class="pagination justify-content-center">
@@ -157,8 +161,7 @@ $totalPages = ceil($totalOrders / $limit);
         </ul>
     </nav>
 </div>
-
-<!-- Modal for Staff when they try to access the dashboard -->
+<!-- Modal para sa Staff kung mag try sila access sa dashboard -->
 <div class="modal fade" id="accessDeniedModal" tabindex="-1" aria-labelledby="accessDeniedModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
