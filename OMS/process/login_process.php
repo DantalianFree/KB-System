@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['usertype'] = $usertype;
 
             if($usertype == 'Staff') {
-                header("Location: ../../oms_dashboard.php");
+                header("Location: ../src/orders_list.php");
             } elseif($usertype == 'Manager') {
                 header("Location: ../../Inventory/src/dashboard.php");
             } else {
