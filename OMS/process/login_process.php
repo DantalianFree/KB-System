@@ -35,6 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt->close();
-    header("Location: ../forms/login_form.php");
+    header("Location: ../../process/login_form.php");
     exit;
 }
