@@ -140,23 +140,18 @@
     <div class="container mt-5">
         <h2 class="text-center mb-4">Dashboard</h2>
         <div class="row">
-            <!-- Total Items Card -->
             <div class="col-md-4">
                 <div class="dashboard-card">
                     <h4>Total Items</h4>
                     <p class="display-4"><?php echo $totalItems; ?></p>
                 </div>
             </div>
-
-            <!-- Low Stock Items Card -->
             <div class="col-md-4">
                 <div class="dashboard-card">
                     <h4>Low Stock Items</h4>
                     <p class="display-4"><?php echo count($lowStockItems); ?></p>
                 </div>
             </div>
-
-            <!-- Categories Card -->
             <div class="col-md-4">
                 <div class="dashboard-card">
                     <h4>Categories</h4>
@@ -168,18 +163,13 @@
                 </div>
             </div>
         </div>
-
-        <!-- Charts Section -->
         <div class="row mt-5">
-            <!-- Pie Chart for Low Stock Items -->
             <div class="col-md-6">
                 <div class="dashboard-card">
                     <h4>Low Stock Item Categories</h4>
                     <canvas id="lowStockChart"></canvas>
                 </div>
             </div>
-
-            <!-- Recent Activities -->
             <div class="col-md-6">
                 <div class="dashboard-card">
                     <h4>Recent Activities</h4>
@@ -189,8 +179,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Quick Actions Section -->
         <div class="row mt-5">
             <div class="col-md-4">
                 <div class="dashboard-card">
@@ -200,8 +188,6 @@
                     <a href="inventory_list.php" class="btn btn-warning mb-2">View Inventory</a>
                 </div>
             </div>
-
-            <!-- Inventory Overview Table -->
             <div class="col-md-8">
                 <div class="dashboard-card">
                     <h4>Inventory Overview</h4>
@@ -230,7 +216,6 @@
     </div>
 
     <script>
-        // Notification Bell Toggle
         const notificationBell = document.getElementById('notificationBell');
         const notificationBox = document.getElementById('notificationBox');
 
@@ -238,7 +223,6 @@
             notificationBox.style.display = notificationBox.style.display === 'none' || notificationBox.style.display === '' ? 'block' : 'none';
         });
 
-        // Chart for Low Stock Items by Category
         const ctx = document.getElementById('lowStockChart').getContext('2d');
         const lowStockChart = new Chart(ctx, {
             type: 'pie',
