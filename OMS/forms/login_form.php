@@ -1,9 +1,8 @@
 <?php
 session_start();
 
-// Get error message from session if set
 $error = isset($_SESSION['error']) ? $_SESSION['error'] : null;
-unset($_SESSION['error']); // Clear the error message after showing it
+unset($_SESSION['error']); 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +13,7 @@ unset($_SESSION['error']); // Clear the error message after showing it
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f0f4f8; /* Light background color for contrast */
+            background-color: #f0f4f8; 
         }
         .login-container {
             height: 100vh;
