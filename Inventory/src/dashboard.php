@@ -1,6 +1,12 @@
 <?php 
 include '..\src\conn.php';
 
+session_start();
+
+if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin') {
+    echo "You don't have access to this page.";
+    }
+
 $totalItemsQuery = "SELECT COUNT(*) as totalItems FROM inventory";
 $totalItemsResult = $conn->query($totalItemsQuery);
 $totalItems = $totalItemsResult->fetch_assoc()['totalItems'];
@@ -12,7 +18,6 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
 $categoriesQuery = "SELECT Category, COUNT(*) as count FROM inventory GROUP BY Category";
 $categoriesResult = $conn->query($categoriesQuery);
 
-// Get recent activities or events (you can change this based on your data)
 $activities = [
     "New order received from Supplier A.",
     "Stock updated for Item X.",
