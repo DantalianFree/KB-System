@@ -133,7 +133,7 @@ if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin') {
 <?php endif; ?>
 
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Customer Registration</h2>
+    <h2 class="text-center mb-4">Customer Registration For Loyalty Program</h2>
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="form-card">
@@ -160,13 +160,9 @@ if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin') {
         </div>
     </div>
 </div>
-
-<!-- Bootstrap JS and Popper.js -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- JavaScript for Sidebar Toggle -->
 <script>
-   // Toggle sidebar visibility when the navbar brand is clicked
+    // Toggle sidebar visibility when the navbar brand is clicked
     document.getElementById('navbarBrand').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
         sidebar.classList.toggle('open');
