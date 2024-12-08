@@ -4,6 +4,11 @@ $inventoryConn = new mysqli('localhost', 'root', '', 'kb_inventory');  // Invent
 
 session_start();
 
+// Initialize the cart array in session if not set
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
 // Check if the user is logged in (Staff user)
 if (!isset($_SESSION['usertype'])) {
     echo "You are not logged in to access this page.";
@@ -42,119 +47,54 @@ while ($row = $menuItemsResult->fetch_assoc()) {
     $menuItems[$row['MenuID']][] = $row;
 }
 
-// Handle placing an order (for example, using POST)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $menuItemID = $_POST['menuItemID'];
-    $orderQuantity = $_POST['quantity']; // Quantity of the menu item ordered
+// Handle actions (add to cart or remove from cart)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if ($_POST['action'] == 'add_to_cart') {
+        $menuItemID = $_POST['menuItemID'];
+        $orderQuantity = $_POST['quantity']; // Quantity of the menu item ordered
 
-    // Step 1: Fetch the ingredients for the ordered menu item from inventory database
-    $ingredientsQuery = "
-    SELECT 
-        ii.IngredientID, 
-        i.ItemName, 
-        ii.QuantityRequired, 
-        i.Quantity as AvailableQuantity,
-        mi.Price -- Fetch the menu item price
-    FROM 
-        order_management.menu_item_ingredients ii
-    LEFT JOIN 
-        kb_inventory.inventory i ON ii.IngredientID = i.InventoryID
-    JOIN 
-        order_management.menu_item mi ON ii.MenuItemID = mi.MenuItemID -- Join to get the price
-    WHERE 
-        ii.MenuItemID = ?";
+        // Fetch the menu item details
+        $itemQuery = "SELECT Name, Price FROM menu_item WHERE MenuItemID = ?";
+        $stmt = $conn->prepare($itemQuery);
+        $stmt->bind_param("i", $menuItemID);
+        $stmt->execute();
+        $itemResult = $stmt->get_result()->fetch_assoc();
 
-
-    $stmt = $inventoryConn->prepare($ingredientsQuery);
-    $stmt->bind_param("i", $menuItemID);
-    $stmt->execute();
-    $ingredientsResult = $stmt->get_result();
-    $ingredients = [];
-
-    while ($ingredient = $ingredientsResult->fetch_assoc()) {
-        $ingredients[] = $ingredient;
-    }
-
-    // Step 2: Check if inventory has enough ingredients to fulfill the order
-    foreach ($ingredients as $ingredient) {
-        $ingredientID = $ingredient['IngredientID'];
-        $quantityRequired = $ingredient['QuantityRequired'] * $orderQuantity;
-    
-        // Fetch current stock from inventory database
-        $stockQuery = "SELECT Quantity FROM kb_inventory.inventory WHERE InventoryID = ?";
-        $stockStmt = $inventoryConn->prepare($stockQuery);
-        $stockStmt->bind_param("i", $ingredientID);
-        $stockStmt->execute();
-        $stockResult = $stockStmt->get_result()->fetch_assoc();
-        $currentStock = $stockResult['Quantity'];
-    
-        // If there is not enough stock, show error message
-        if ($currentStock < $quantityRequired) {
-            echo "Not enough stock for ingredient: " . $ingredient['ItemName'];
-            exit;
-        }
-    }
-    
-
-    // Step 3: Update inventory by reducing the stock in the inventory database
-    $inventoryConn->begin_transaction();
-
-    try {
-        foreach ($ingredients as $ingredient) {
-            $ingredientID = $ingredient['IngredientID'];
-            $quantityRequired = $ingredient['QuantityRequired'] * $orderQuantity;
-
-            // Update inventory quantity in the inventory database
-            $updateStockQuery = "UPDATE kb_inventory.inventory SET Quantity = Quantity - ? WHERE InventoryID = ?";
-            $updateStmt = $inventoryConn->prepare($updateStockQuery);
-            $updateStmt->bind_param("di", $quantityRequired, $ingredientID);
-            $updateStmt->execute();
-        }
-
-        // Step 4: Create the order record in the orders table
-        if (isset($_SESSION['StaffID'])) {
-            $staffID = $_SESSION['StaffID']; // Retrieve StaffID from session
-        } else {
-            echo "StaffID not found in session. Unable to proceed.";
-            exit;
-        }
-
-        $customerID = 1; // Use a valid CustomerID (make sure this ID exists in the customer table)
-        $totalAmount = 0; // Calculate total amount here based on ordered items
-
-        // Insert into the `order` table
-        $orderQuery = "INSERT INTO `order` (CustomerID, StaffID, OrderDate, TotalAmount) VALUES (?, ?, NOW(), ?)";
-        $orderStmt = $conn->prepare($orderQuery);
-        $orderStmt->bind_param("iid", $customerID, $staffID, $totalAmount);
-
-        if ($orderStmt->execute()) {
-            $orderID = $conn->insert_id; // Get the last inserted OrderID
-        
-            // Add order details for the menu items
-            $orderDetailQuery = "INSERT INTO orderdetails (OrderID, MenuItemID, Quantity, Subtotal) VALUES (?, ?, ?, ?)";
-            $orderDetailStmt = $conn->prepare($orderDetailQuery);
-        
-            foreach ($ingredients as $ingredient) {
-                $price = $ingredient['Price']; // Price of the menu item
-                $subtotal = $orderQuantity * $price; // Calculate subtotal for this menu item
-                $orderDetailStmt->bind_param("iiid", $orderID, $menuItemID, $orderQuantity, $subtotal);
-                $orderDetailStmt->execute();
+        // Check if the item is already in the cart
+        $itemExists = false;
+        foreach ($_SESSION['cart'] as &$cartItem) {
+            if ($cartItem['MenuItemID'] == $menuItemID) {
+                $cartItem['Quantity'] += $orderQuantity;  // Update the quantity
+                $itemExists = true;
+                break;
             }
-            // Commit transaction for inventory and orders
-            $inventoryConn->commit();
-            echo "Order successfully placed!";
-        } else {
-            echo "Failed to place the order. Please try again.";
-            $inventoryConn->rollback(); // Rollback transaction in case of error
         }
-    } catch (Exception $e) {
-        // Rollback transaction in case of error
-        $inventoryConn->rollback();
-        echo "Failed to place the order. Please try again.";
+
+        // If the item is not in the cart, add it
+        if (!$itemExists) {
+            $cartItem = [
+                'MenuItemID' => $menuItemID,
+                'Name' => $itemResult['Name'],
+                'Price' => $itemResult['Price'],
+                'Quantity' => $orderQuantity
+            ];
+            $_SESSION['cart'][] = $cartItem;  // Add to cart session
+        }
+    }
+
+    // Handle removing items from the cart
+    if ($_POST['action'] == 'remove_from_cart' && isset($_POST['index'])) {
+        $index = $_POST['index'];
+
+        // Remove the item from the cart
+        unset($_SESSION['cart'][$index]);
+
+        // Re-index the array to prevent gaps in the indexes
+        $_SESSION['cart'] = array_values($_SESSION['cart']);
     }
 }
-?>
 
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -163,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Menu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         .menu-item-card {
             border: 1px solid #ddd;
@@ -173,9 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .menu-item-card img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
         }
         .menu-item-card .menu-item-name {
             font-weight: bold;
@@ -195,18 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             pointer-events: none;
             opacity: 0.5;
         }
-        .menu-item-card img {
-        width: 100%; /* Makes the image fill the entire width of the container */
-        height: 150px; /* Set the desired fixed height for the image */
-        object-fit: cover; /* Makes sure the image covers the area without distortion */
-        }
-        .menu-item-card img {
-        width: 200px;
-        height: 200px;
-        object-fit: contain; /* This ensures the aspect ratio is preserved */
-        }
-
-
     </style>
 </head>
 <body>
@@ -224,7 +153,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li class="nav-item">
                     <a class="nav-link" href="orders_list.php">Order List</a>
                 </li>
+                <?php if ($_SESSION['usertype'] !== 'Staff'): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="order_reports.php">Reports</a>
+                    </li>
+                <?php endif; ?>
             </ul>
+        </div>
+        <div class="d-flex">
+            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#cartModal">
+                <i class="fas fa-shopping-cart"></i> Cart
+            </button>
         </div>
         <div>
             <a href="oms_dashboard.php" class="btn btn-secondary btn-sm 
@@ -237,6 +176,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </nav>
+
+<!-- Cart Modal -->
+<div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cartModalLabel">Your Cart</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+    <?php if (!empty($_SESSION['cart'])): ?>
+        <ul class="list-group">
+            <?php foreach ($_SESSION['cart'] as $key => $cartItem): ?>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <?php echo $cartItem['Name']; ?> 
+                    x <?php echo $cartItem['Quantity']; ?> 
+                    - ₱<?php echo number_format($cartItem['Price'] * $cartItem['Quantity'], 2); ?>
+                    <form action="order_menu.php" method="POST" style="display:inline;">
+                        <input type="hidden" name="action" value="remove_from_cart">
+                        <input type="hidden" name="index" value="<?php echo $key; ?>">
+                        <button type="submit" class="btn btn-sm btn-danger">X</button>
+                    </form>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+        <hr>
+        <p><strong>Total: ₱<?php 
+            $total = 0;
+            foreach ($_SESSION['cart'] as $cartItem) {
+                $total += $cartItem['Price'] * $cartItem['Quantity'];
+            }
+            echo number_format($total, 2);
+        ?></strong></p>
+    <?php else: ?>
+        <p>Your cart is empty.</p>
+    <?php endif; ?>
+</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="window.location.href='checkout.php'">Proceed to Checkout</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">Select Items for Order</h2>
@@ -258,7 +241,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <form action="order_menu.php" method="POST">
                                     <input type="hidden" name="menuItemID" value="<?php echo $item['MenuItemID']; ?>">
                                     <input type="number" name="quantity" min="1" value="1" class="form-control mb-2">
-                                    <button type="submit" class="btn btn-success">Add to Order</button>
+                                    <input type="hidden" name="action" value="add_to_cart">
+                                    <button type="submit" class="btn btn-success">Add to Cart</button>
                                 </form>
                             </div>
                         </div>
@@ -271,33 +255,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endwhile; ?>
 </div>
 
-<div class="modal fade" id="accessDeniedModal" tabindex="-1" aria-labelledby="accessDeniedModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="accessDeniedModalLabel">Access Denied</h5>
-      </div>
-      <div class="modal-body">
-        You do not have access to the Dashboard.
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Initialize the modal for the staff user when they try to access the dashboard button
-    var dashboardBtn = document.getElementById('dashboardBtn');
-    if (dashboardBtn) {
-        dashboardBtn.addEventListener('click', function(event) {
-            if (<?php echo $_SESSION['usertype'] == 'Staff' ? 'true' : 'false'; ?>) {
-                event.preventDefault();  // Prevent the default action
-                var myModal = new bootstrap.Modal(document.getElementById('accessDeniedModal'));
-                myModal.show();  // Show the modal
-            }
-        });
-    }
-</script>
 </body>
 </html>
-

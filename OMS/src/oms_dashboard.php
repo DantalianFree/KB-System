@@ -56,17 +56,80 @@ while ($row = $ordersByDate->fetch_assoc()) {
             padding: 20px;
             text-align: center;
         }
-        .navbar-nav.ml-auto {
-                display: flex;
-                align-items: center;
+
+        /* Sidebar Styles */
+        .sidebar {
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            visibility: hidden; /* Initially hidden */
+            opacity: 0; /* Fade out when hidden */
         }
 
+        .sidebar.open {
+            visibility: visible;
+            opacity: 1;
+            width: 250px;
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #007bff;
+        }
+
+        /* Navbar Brand Styles */
+        .navbar-brand {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;  /* Space between the icon and the text */
+        }
+
+        /* Close Button for Sidebar */
+        .sidebar .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            z-index: 1010;
+        }
+        .sidebar-toggler {
+            display: none;  /* Hide this, as the navbar brand will toggle the sidebar */
+        }
+        .content {
+            margin-top: 20px; /* Adjust this value as needed to avoid overlap */
+            margin-left: 250px;  /* Keep space for the sidebar */
+            padding-top: 20px;
+        }
     </style>
 </head>
 <body>
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="oms_dashboard.php">KB's StopOver OMS</a>
+        <a class="navbar-brand" href="#" id="navbarBrand">
+            <i class="bi bi-list"></i> KB's StopOver OMS
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -78,11 +141,14 @@ while ($row = $ordersByDate->fetch_assoc()) {
                 <li class="nav-item">
                     <a class="nav-link" href="orders_list.php">Order List</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="order_reports.php">Reports</a>
+                </li>
             </ul>
         </div>
         <div>
             <a href="oms_dashboard.php" class="btn btn-secondary btn-sm 
-                <?php echo ($_SESSION['usertype'] == 'Staff') ? 'disabled-button' : ''; ?>"
+                <?php echo ($_SESSION['usertype'] == 'Staff') ? 'disabled-button' : ''; ?> "
                 id="dashboardBtn" 
                 <?php echo ($_SESSION['usertype'] == 'Staff') ? 'data-bs-toggle="modal" data-bs-target="#accessDeniedModal"' : ''; ?>>
                 <?php echo ($_SESSION['usertype'] == 'Staff') ? 'Access Denied' : 'Dashboard'; ?>
@@ -91,6 +157,15 @@ while ($row = $ordersByDate->fetch_assoc()) {
         </div>
     </div>
 </nav>
+
+<?php if ($_SESSION['usertype'] === 'Manager' || $_SESSION['usertype'] === 'Admin'): ?>
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" id="closeBtn">&times;</span>
+        <h4 class="text-center">KB's Stopover</h4>
+        <a href="../../Inventory/src/dashboard.php">Inventory</a>
+        <a href="oms_dashboard.php">OMS (Order Management System)</a>
+    </div>
+<?php endif; ?>
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">Order Dashboard</h2>
@@ -144,6 +219,7 @@ while ($row = $ordersByDate->fetch_assoc()) {
                     </tbody>
                 </table>
                 <a href="orders_list.php" class="btn btn-primary">View All Orders</a>
+                <a href="order_reports.php" class="btn btn-primary">View Reports</a>
             </div>
         </div>
 
@@ -177,8 +253,21 @@ while ($row = $ordersByDate->fetch_assoc()) {
             }
         }
     });
+
+    // Toggle sidebar visibility when the navbar brand is clicked
+    document.getElementById('navbarBrand').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('open');
+    });
+
+    // Close sidebar when the close button is clicked
+    document.getElementById('closeBtn').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.remove('open');
+    });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

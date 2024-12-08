@@ -87,6 +87,11 @@ $totalPages = ceil($totalOrders / $limit);
                 <li class="nav-item">
                     <a class="nav-link active" href="orders_list.php">Order List</a>
                 </li>
+                <?php if ($_SESSION['usertype'] !== 'Staff'): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="order_reports.php">Reports</a>
+                    </li>
+                <?php endif; ?>
             </ul>
         </div>
         <div>
@@ -103,14 +108,12 @@ $totalPages = ceil($totalOrders / $limit);
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">Orders List</h2>
-    <!-- Search Form -->
     <form method="GET" class="mb-3">
         <div class="input-group">
             <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" class="form-control" placeholder="Search by Order ID or Customer ID">
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
     </form>
-    <!-- Orders Table -->
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
