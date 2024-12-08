@@ -43,7 +43,11 @@ while ($row = $existingItemsResult->fetch_assoc()) {
             "sesame oil": { category: "Condiment", unit: "liters" },
             onion: { category: "Vegetables", unit: "kg" },
             lettuce: { category: "Vegetables", unit: "kg" },
-            kimchi: { category: "Vegetables", unit: "kg" }
+            kimchi: { category: "Vegetables", unit: "kg" },
+            egg: { category: "Eggs", unit: "kg"},
+            "pork tocino": { category: "Meat", unit: "kg" },
+            longganisa: { category: "Meat", unit: "kg" },
+            "corn beef": { category: "Meat", unit: "kg" }
         };
 
         function updateCategoryAndUnit() {
