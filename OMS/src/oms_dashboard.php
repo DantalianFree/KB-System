@@ -2,36 +2,26 @@
 include '../conn.php';
 session_start();
 
-// Only allow Managers and Admins to access the page
 if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin') {
     echo "You don't have access to this page.";
     exit;
 }
 
-// Fetch total orders
 $totalOrdersQuery = "SELECT COUNT(*) as totalOrders FROM `order`";
 $totalOrders = $conn->query($totalOrdersQuery)->fetch_assoc()['totalOrders'];
 
-// Fetch total revenue
 $totalRevenueQuery = "SELECT SUM(TotalAmount) as totalRevenue FROM `order`";
 $totalRevenue = $conn->query($totalRevenueQuery)->fetch_assoc()['totalRevenue'] ?? 0;
 
-// Fetch total customers
 $totalCustomersQuery = "SELECT COUNT(DISTINCT CustomerID) as totalCustomers FROM `order`";
 $totalCustomers = $conn->query($totalCustomersQuery)->fetch_assoc()['totalCustomers'];
 
-// Fetch recent order date
 $recentOrderDateQuery = "SELECT MAX(OrderDate) as recentOrder FROM `order`";
 $recentOrderDate = $conn->query($recentOrderDateQuery)->fetch_assoc()['recentOrder'];
 
-// Fetch recent orders
-$recentOrdersQuery = "SELECT OrderID, CustomerID, OrderDate, TotalAmount 
-                      FROM `order` 
-                      ORDER BY OrderDate DESC 
-                      LIMIT 5";
+$recentOrdersQuery = "SELECT OrderID, CustomerID, OrderDate, TotalAmount FROM `order` ORDER BY OrderDate DESC LIMIT 5";
 $recentOrders = $conn->query($recentOrdersQuery);
 
-// Fetch order totals by date for chart
 $ordersByDateQuery = "SELECT DATE(OrderDate) as orderDate, SUM(TotalAmount) as dailyTotal 
                       FROM `order` 
                       GROUP BY DATE(OrderDate) 
@@ -67,9 +57,10 @@ while ($row = $ordersByDate->fetch_assoc()) {
             text-align: center;
         }
         .navbar-nav.ml-auto {
-            display: flex;
-            align-items: center;
+                display: flex;
+                align-items: center;
         }
+
     </style>
 </head>
 <body>
@@ -82,7 +73,7 @@ while ($row = $ordersByDate->fetch_assoc()) {
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active" href="oms_dashboard.php">Dashboard</a>
+                    <a class="nav-link" href="order_menu.php">Menu</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="orders_list.php">Order List</a>
@@ -90,6 +81,12 @@ while ($row = $ordersByDate->fetch_assoc()) {
             </ul>
         </div>
         <div>
+            <a href="oms_dashboard.php" class="btn btn-secondary btn-sm 
+                <?php echo ($_SESSION['usertype'] == 'Staff') ? 'disabled-button' : ''; ?>"
+                id="dashboardBtn" 
+                <?php echo ($_SESSION['usertype'] == 'Staff') ? 'data-bs-toggle="modal" data-bs-target="#accessDeniedModal"' : ''; ?>>
+                <?php echo ($_SESSION['usertype'] == 'Staff') ? 'Access Denied' : 'Dashboard'; ?>
+            </a>
             <a href="../../process/log_out.php" class="btn btn-danger btn-sm">Logout</a>
         </div>
     </div>
