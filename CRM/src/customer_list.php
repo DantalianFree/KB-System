@@ -130,7 +130,7 @@ $stmt->close();
                     <a class="nav-link" href="customer_list.php">Customer List</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../forms/customer_reg.php">Customer Registration</a>
+                    <a class="nav-link" href="feedback_qr.php">QR Form</a>
                 </li>
             </ul>
         </div>

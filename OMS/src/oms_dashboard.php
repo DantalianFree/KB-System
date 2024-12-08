@@ -164,7 +164,7 @@ while ($row = $ordersByDate->fetch_assoc()) {
         <h4 class="text-center">KB's Stopover</h4>
         <a href="../../Inventory/src/dashboard.php">Inventory</a>
         <a href="oms_dashboard.php">OMS (Order Management System)</a>
-        <a href="../../CRM/forms/customer_reg.php">CRM (Customer Relationship Management)</a>
+        <a href="../../CRM/src/customer_list.php">CRM (Customer Relationship Management)</a>
     </div>
 <?php endif; ?>
 
