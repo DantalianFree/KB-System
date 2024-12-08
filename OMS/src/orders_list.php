@@ -1,39 +1,45 @@
 <?php
-    include '../conn.php';
-    session_start();
+include '../conn.php';
+session_start();
 
-    // Check if the user is logged in
-    if (!isset($_SESSION['usertype'])) {
-        echo "You are not logged in.";
-        exit;
-    }
+// Check if the user is logged in
+if (!isset($_SESSION['usertype'])) {
+    echo "You are not logged in.";
+    exit;
+}
 
-    // Fetch search and sorting parameters
-    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'OrderDate';
-    $order = isset($_GET['order']) ? $_GET['order'] : 'DESC';
+// Fetch search and sorting parameters
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'OrderDate';
+$order = isset($_GET['order']) ? $_GET['order'] : 'DESC';
 
-    // Pagination settings
-    $limit = 10; // Number of rows per page
-    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
-    $offset = ($page - 1) * $limit;
+// Pagination settings
+$limit = 10; // Number of rows per page
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
 
-    // Build the query
-    $whereClause = $search ? "WHERE OrderID LIKE '%$search%' OR CustomerID LIKE '%$search%'" : '';
-    $orderByClause = "ORDER BY $sort $order";
+// Build the query
+$whereClause = $search ? "WHERE o.OrderID LIKE '%$search%' OR o.CustomerID LIKE '%$search%'" : '';
+$orderByClause = "ORDER BY $sort $order";
 
-    $totalOrdersQuery = "SELECT COUNT(*) as total FROM `order` $whereClause";
-    $totalOrders = $conn->query($totalOrdersQuery)->fetch_assoc()['total'];
+$totalOrdersQuery = "SELECT COUNT(*) as total FROM `order` o $whereClause";
+$totalOrders = $conn->query($totalOrdersQuery)->fetch_assoc()['total'];
 
-    $ordersQuery = "SELECT OrderID, CustomerID, OrderDate, TotalAmount 
-                    FROM `order` 
-                    $whereClause 
-                    $orderByClause 
-                    LIMIT $limit OFFSET $offset";
-    $ordersResult = $conn->query($ordersQuery);
+$ordersQuery = "
+    SELECT 
+        o.OrderID, 
+        o.CustomerID, 
+        o.OrderDate, 
+        (SELECT SUM(od.Subtotal) FROM orderdetails od WHERE od.OrderID = o.OrderID) AS TotalAmount
+    FROM `order` o 
+    $whereClause 
+    $orderByClause 
+    LIMIT $limit OFFSET $offset";
 
-    // Total pages calculation
-    $totalPages = ceil($totalOrders / $limit);
+$ordersResult = $conn->query($ordersQuery);
+
+// Total pages calculation
+$totalPages = ceil($totalOrders / $limit);
 ?>
 
 <!DOCTYPE html>
@@ -72,7 +78,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="orders_list.php">KB's StopOver OMS</a>
+        <a class="navbar-brand" href="order_menu.php">KB's StopOver OMS</a>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
@@ -84,7 +90,6 @@
             </ul>
         </div>
         <div>
-            <!-- Dashboard button para sa staff with modal trigger -->
             <a href="oms_dashboard.php" class="btn btn-secondary btn-sm 
                 <?php echo ($_SESSION['usertype'] == 'Staff') ? 'disabled-button' : ''; ?>"
                 id="dashboardBtn" 
@@ -161,6 +166,7 @@
         </ul>
     </nav>
 </div>
+
 <!-- Modal para sa Staff kung mag try sila access sa dashboard -->
 <div class="modal fade" id="accessDeniedModal" tabindex="-1" aria-labelledby="accessDeniedModalLabel" aria-hidden="true">
   <div class="modal-dialog">
