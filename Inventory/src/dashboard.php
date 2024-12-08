@@ -1,94 +1,164 @@
-    <?php 
-    include '..\src\conn.php';
+<?php 
+include '..\src\conn.php';
 
-    session_start();
+session_start();
 
-    if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin') {
-        echo "You don't have access to this page.";
+if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin') {
+    echo "You don't have access to this page.";
+    exit;
+}
+
+$totalItemsQuery = "SELECT COUNT(*) as totalItems FROM inventory";
+$totalItemsResult = $conn->query($totalItemsQuery);
+$totalItems = $totalItemsResult->fetch_assoc()['totalItems'];
+
+$lowStockQuery = "SELECT * FROM inventory WHERE Quantity <= ReorderLevel";
+$lowStockResult = $conn->query($lowStockQuery);
+$lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
+
+$categoriesQuery = "SELECT Category, COUNT(*) as count FROM inventory GROUP BY Category";
+$categoriesResult = $conn->query($categoriesQuery);
+
+$activities = [
+    "New order received from Supplier A.",
+    "Stock updated for Item X.",
+    "Order #123 has been completed."
+];
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+               background-color: #f8f9fa;
+        }
+        .dashboard-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+        .navbar-nav.ml-auto {
+            display: flex;
+            align-items: center;
+        }
+        .notification-badge {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 1px 7px;
+            font-size: 12px;
+        }
+        .notification-box {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            border-radius: 5px;
+            padding: 10px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .notification-box ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .notification-box ul li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .notification-box ul li:last-child {
+            border-bottom: none;
+        }
+        /* Sidebar Styles */
+        .sidebar {
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            visibility: hidden; /* Initially hidden */
+            opacity: 0; /* Fade out when hidden */
         }
 
-    $totalItemsQuery = "SELECT COUNT(*) as totalItems FROM inventory";
-    $totalItemsResult = $conn->query($totalItemsQuery);
-    $totalItems = $totalItemsResult->fetch_assoc()['totalItems'];
+        .sidebar.open {
+            visibility: visible;
+            opacity: 1;
+            width: 250px;
+        }
 
-    $lowStockQuery = "SELECT * FROM inventory WHERE Quantity <= ReorderLevel";
-    $lowStockResult = $conn->query($lowStockQuery);
-    $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
+        .sidebar a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
 
-    $categoriesQuery = "SELECT Category, COUNT(*) as count FROM inventory GROUP BY Category";
-    $categoriesResult = $conn->query($categoriesQuery);
+        .sidebar a:hover {
+            background-color: #007bff;
+        }
 
-    $activities = [
-        "New order received from Supplier A.",
-        "Stock updated for Item X.",
-        "Order #123 has been completed."
-    ];
-    ?>
+        /* Navbar Brand Styles */
+        .navbar-brand {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+        }
 
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Dashboard</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <style>
-            body {
-                background-color: #f8f9fa;
-            }
-            .dashboard-card {
-                background-color: white;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                padding: 20px;
-                text-align: center;
-            }
-            .navbar-nav.ml-auto {
-                display: flex;
-                align-items: center;
-            }
-            .notification-badge {
-                position: absolute;
-                top: 0px;
-                right: 0px;
-                background-color: red;
-                color: white;
-                border-radius: 50%;
-                padding: 1px 7px;
-                font-size: 12px;
-            }
-            .notification-box {
-                position: absolute;
-                top: 40px;
-                right: 0;
-                background-color: white;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                width: 300px;
-                border-radius: 5px;
-                padding: 10px;
-                display: none;
-                max-height: 300px;
-                overflow-y: auto;
-            }
-            .notification-box ul {
-                list-style-type: none;
-                padding: 0;
-            }
-            .notification-box ul li {
-                padding: 10px;
-                border-bottom: 1px solid #ddd;
-            }
-            .notification-box ul li:last-child {
-                border-bottom: none;
-            }
-        </style>
-    </head>
-    <body>
+        .navbar-brand i {
+            margin-right: 10px;  /* Space between the icon and the text */
+        }
+
+        /* Close Button for Sidebar */
+        .sidebar .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            z-index: 1010;
+        }
+
+        /* Sidebar Toggler Icon */
+        .sidebar-toggler {
+            display: none;  /* Hide this, as the navbar brand will toggle the sidebar */
+        }
+
+        .content {
+            margin-top: 20px; /* Adjust this value as needed to avoid overlap */
+            margin-left: 250px;  /* Keep space for the sidebar */
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="dashboard.php">KB's Stopover</a>
+            <!-- Add the ID for the sidebar toggle -->
+            <a class="navbar-brand" href="#" id="navbarBrand">
+                <i class="bi bi-list"></i>KB's Stopover</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -136,6 +206,15 @@
             </div>
         </div>
     </nav>
+
+    <?php if ($_SESSION['usertype'] === 'Manager' || $_SESSION['usertype'] === 'Admin'): ?>
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" id="closeBtn">&times;</span>
+        <h4 class="text-center">KB's Stopover</h4>
+        <a href="../../Inventory/src/dashboard.php">Inventory</a>
+        <a href="../../OMS/src/oms_dashboard.php">OMS (Order Management System)</a>
+    </div>
+    <?php endif; ?>
 
     <div class="container mt-5">
         <h2 class="text-center mb-4">Dashboard</h2>
@@ -215,27 +294,25 @@
         </div>
     </div>
 
-    <script>
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationBox = document.getElementById('notificationBox');
+<script>
+    const notificationBell = document.getElementById('notificationBell');
+    const notificationBox = document.getElementById('notificationBox');
+    const sidebar = document.getElementById('sidebar');
+    const navbarBrand = document.getElementById('navbarBrand');
+    const closeBtn = document.getElementById('closeBtn');
 
-        notificationBell.addEventListener('click', function() {
-            notificationBox.style.display = notificationBox.style.display === 'none' || notificationBox.style.display === '' ? 'block' : 'none';
-        });
+    notificationBell.addEventListener('click', () => {
+        notificationBox.style.display = (notificationBox.style.display === 'block') ? 'none' : 'block';
+    });
 
-        const ctx = document.getElementById('lowStockChart').getContext('2d');
-        const lowStockChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: <?php echo json_encode(array_column($lowStockItems, 'Category')); ?>,
-                datasets: [{
-                    data: <?php echo json_encode(array_column($lowStockItems, 'Quantity')); ?>,
-                    backgroundColor: ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99', '#ffb3e6'],
-                }]
-            }
-        });
-    </script>
+    navbarBrand.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+    });
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
-    </html>
+    closeBtn.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+    });
+</script>
+
+</body>
+</html>
