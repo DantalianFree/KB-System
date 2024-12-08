@@ -1,11 +1,12 @@
 <?php
-session_start(); 
-include '../conn.php'; 
+session_start();
+include '../conn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
+    // First, fetch UserType and Password from the Authentication table
     $stmt = $conn->prepare("SELECT `Password`, UserType FROM Authentication WHERE Username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -16,12 +17,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->fetch();
 
         if (password_verify($password, $storedHash)) {
+            // Set common session variables
             $_SESSION['username'] = $username;
             $_SESSION['usertype'] = $usertype;
 
-            if($usertype == 'Staff') {
+            // If user is a staff, retrieve their StaffID
+            if ($usertype === 'Staff') {
+                $staffStmt = $conn->prepare("SELECT StaffID FROM Staff WHERE Name = ?");
+                $staffStmt->bind_param("s", $username);
+                $staffStmt->execute();
+                $staffResult = $staffStmt->get_result();
+
+                if ($staffRow = $staffResult->fetch_assoc()) {
+                    $_SESSION['StaffID'] = $staffRow['StaffID']; // Save StaffID in session
+                } else {
+                    $_SESSION['error'] = 'Staff record not found.';
+                    header("Location: ../../process/login_form.php");
+                    exit;
+                }
+                $staffStmt->close();
+            }
+
+            // Redirect based on UserType
+            if ($usertype === 'Staff') {
                 header("Location: ../src/orders_list.php");
-            } elseif($usertype == 'Manager') {
+            } elseif ($usertype === 'Manager') {
                 header("Location: ../../Inventory/src/dashboard.php");
             } else {
                 header("Location: ../../Inventory/src/dashboard.php");
@@ -38,3 +58,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: ../../process/login_form.php");
     exit;
 }
+?>
