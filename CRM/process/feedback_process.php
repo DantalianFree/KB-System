@@ -24,15 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Feedback submitted successfully!";
+        $_SESSION['feedback_id'] = $stmt->insert_id;  // Store the feedback ID to show on the next page
+        header('Location: ../src/thank_you.php');  // Redirect to thank you page
+        exit;
     } else {
         $_SESSION['error'] = "Failed to submit feedback. Please try again.";
     }
 
     $stmt->close();
-    header('Location: thank_you.php');  // Redirect back to the form
-    exit;
 } else {
     $_SESSION['error'] = "Invalid request.";
     header('Location: ../forms/feedback_form.php');
     exit;
 }
+?>

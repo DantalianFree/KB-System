@@ -1,10 +1,10 @@
 <?php
 session_start();
+include '../conn.php';
 
-// Ensure the customer is logged in
 if (!isset($_SESSION['customer_id'])) {
     $_SESSION['error'] = "Please log in to submit feedback.";
-    header('Location: login_form.php');
+    header('Location: login_form.php');  // Redirect to login page
     exit;
 }
 ?>
@@ -34,6 +34,7 @@ if (!isset($_SESSION['customer_id'])) {
 <div class="container mt-5">
     <h2 class="text-center">Customer Feedback</h2>
 
+    <!-- Display error or success message -->
     <?php
     if (isset($_SESSION['error'])) {
         echo '<div class="alert alert-danger text-center">' . $_SESSION['error'] . '</div>';

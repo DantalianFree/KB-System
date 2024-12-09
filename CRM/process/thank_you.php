@@ -43,7 +43,12 @@ unset($_SESSION['success']);
         <h1 class="display-5">Thank You!</h1>
         <p class="mt-3"><?php echo htmlspecialchars($successMessage); ?></p>
         <p>You can now close this page.</p>
-        <a href="../forms/feedback_form.php" class="btn btn-primary mt-4">Submit Another Feedback</a>
+        
+        <!-- Button to view feedback -->
+        <a href="view_feedback.php" class="btn btn-success mt-4">View Your Feedback</a>
+
+        <!-- Optional: Button to submit another feedback -->
+        <a href="../forms/feedback_form.php" class="btn btn-primary mt-2">Submit Another Feedback</a>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
