@@ -1,6 +1,13 @@
 <?php 
 include '..\src\conn.php';
 
+session_start();
+
+if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin') {
+    echo "You don't have access to this page.";
+    exit;
+}
+
 // Pagination settings
 $itemsPerPage = 10; 
 $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1; 
@@ -68,6 +75,53 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
             max-height: 300px;
             overflow-y: auto;
         }
+        /* Sidebar Styles */
+        .sidebar {
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            visibility: hidden; /* Initially hidden */
+            opacity: 0; /* Fade out when hidden */
+        }
+
+        .sidebar.open {
+            visibility: visible;
+            opacity: 1;
+            width: 250px;
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #007bff;
+        }
+
+        /* Sidebar close button */
+        .sidebar .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            z-index: 1010;
+        }
+        .navbar-brand i {
+            margin-right: 10px;  /* Space between the icon and the text */
+        }
     </style>
     <script>
         const itemDetails = {
@@ -108,7 +162,9 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="dashboard.php">KB's Stopover</a>
+            <!-- Add the ID for the sidebar toggle -->
+            <a class="navbar-brand" href="#" id="navbarBrand">
+                <i class="bi bi-list"></i>KB's Stopover</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -121,15 +177,15 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
                         <a class="nav-link active" href="inventory_list.php">Inventory</a>
                     </li>
                     <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="supplierDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Suppliers
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="supplierDropdown">
-                        <li><a class="dropdown-item" href="supplier_list.php">Supplier List</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="supplier_orders.php">Supplier Orders</a></li>
-                    </ul>
-                </li>
+                        <a class="nav-link dropdown-toggle" href="#" id="supplierDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Suppliers
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="supplierDropdown">
+                            <li><a class="dropdown-item" href="supplier_list.php">Supplier List</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="supplier_orders.php">Supplier Orders</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
             <div class="navbar-nav ms-auto position-relative">
@@ -157,6 +213,15 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
         </div>
     </nav>
 
+    <?php if ($_SESSION['usertype'] === 'Manager' || $_SESSION['usertype'] === 'Admin'): ?>
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" id="closeBtn">&times;</span>
+        <h4 class="text-center">KB's Stopover</h4>
+        <a href="../../Inventory/src/dashboard.php">Inventory</a>
+        <a href="../../OMS/src/oms_dashboard.php">OMS (Order Management System)</a>
+        <a href="../../CRM/src/customer_list.php">CRM (Customer Relationship Management)</a>
+    </div>
+    <?php endif; ?>
 
     <div class="container mt-5">
         <div class="row">
@@ -290,6 +355,16 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
         const notificationBox = document.getElementById('notificationBox');
         notificationBell.addEventListener('click', () => {
             notificationBox.style.display = notificationBox.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.getElementById('navbarBrand').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('open');
+        });
+
+        document.getElementById('closeBtn').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.remove('open');
         });
     </script>
 

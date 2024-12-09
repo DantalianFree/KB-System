@@ -1,5 +1,11 @@
 <?php 
 include '..\src\conn.php';
+session_start();
+
+if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin') {
+    echo "You don't have access to this page.";
+    exit;
+}
 
 $sql = "SELECT SupplierID, SupplierName, ContactNumber, email, Address, LeadTime, LastUpdated FROM supplier";
 $result = $conn->query($sql);
@@ -61,12 +67,61 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
         .notification-box ul li:last-child {
             border-bottom: none;
         }
+        /* Sidebar Styles */
+        .sidebar {
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            visibility: hidden; /* Initially hidden */
+            opacity: 0; /* Fade out when hidden */
+        }
+
+        .sidebar.open {
+            visibility: visible;
+            opacity: 1;
+            width: 250px;
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #007bff;
+        }
+
+        /* Sidebar close button */
+        .sidebar .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            z-index: 1010;
+        }
+        .navbar-brand i {
+            margin-right: 10px;  /* Space between the icon and the text */
+        }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="dashboard.php">KB's Stopover</a>
+        <!-- Add the ID for the sidebar toggle -->
+        <a class="navbar-brand" href="#" id="navbarBrand">
+            <i class="bi bi-list"></i>KB's Stopover</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -114,6 +169,16 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 </nav>
+
+<?php if ($_SESSION['usertype'] === 'Manager' || $_SESSION['usertype'] === 'Admin'): ?>
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" id="closeBtn">&times;</span>
+        <h4 class="text-center">KB's Stopover</h4>
+        <a href="../../Inventory/src/dashboard.php">Inventory</a>
+        <a href="../../OMS/src/oms_dashboard.php">OMS (Order Management System)</a>
+        <a href="../../CRM/src/customer_list.php">CRM (Customer Relationship Management)</a>
+    </div>
+<?php endif; ?>
 
     <div class="container mt-5">
         <div class="row">
@@ -224,6 +289,16 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
             document.getElementById('editEmail').value = button.getAttribute('data-email');
             document.getElementById('editAddress').value = button.getAttribute('data-address');
             document.getElementById('editLeadTime').value = button.getAttribute('data-leadtime');
+        });
+
+        document.getElementById('navbarBrand').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('open');
+        });
+
+        document.getElementById('closeBtn').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.remove('open');
         });
     </script>
 </body>

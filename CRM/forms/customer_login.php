@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['customer_id'] = $customer['CustomerID'];  // Store CustomerID in session
             $_SESSION['usertype'] = 'Customer';
             $_SESSION['email'] = $customer['Email'];
-            header('Location: feedback_form.php');  // Redirect to feedback page
+            header('Location: ../src/customer_dashboard.php');  // Redirect to feedback page
             exit();
         } else {
             $_SESSION['error'] = 'Incorrect password.';
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         unset($_SESSION['error']);
     }
     ?>
-    <form action="login_form.php" method="POST">
+    <form action="customer_login.php" method="POST">
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
             <input type="email" class="form-control" id="email" name="email" required>
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
     <div class="mt-4 text-center">
-        <p>Don't have an account yet? <a href="registration_form.php" class="btn btn-link">Register now for loyalty points!</a></p>
+        <p>Don't have an account yet? <a href="customer_register.php" class="btn btn-link">Register now for loyalty points!</a></p>
     </div>
 </div>
 

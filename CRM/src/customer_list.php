@@ -127,10 +127,13 @@ $stmt->close();
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="customer_list.php">Customer List</a>
+                    <a class="nav-link active" href="customer_list.php">Customer List</a>
                 </li>
                 <li>
                     <a class="nav-link" href="feedbacks.php">Feedbacks</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="feedback_analysis.php">Analysis</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="feedback_qr.php">QR Form</a>

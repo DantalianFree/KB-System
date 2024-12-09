@@ -101,8 +101,11 @@ if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin' && 
                 <li>
                     <a class="nav-link" href="feedbacks.php">Feedbacks</a>
                 </li>
+                <li>
+                    <a class="nav-link" href="feedback_analysis.php">Analysis</a>
+                </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="feedback_qr.php">QR Form</a>
+                    <a class="nav-link active" href="feedback_qr.php">QR Form</a>
                 </li>
             </ul>
         </div>
@@ -130,7 +133,7 @@ if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin' && 
     <!-- QR Code Image -->
     <div class="qr-container">
         <p>Scan the QR code below to access the feedback form:</p>
-        <img src="../qr/login_qr.png" alt="QR Code for Feedback Form" class="img-fluid" />
+        <img src="../qr/login_qr2.png" alt="QR Code for Feedback Form" class="img-fluid" />
     </div>
 </div>
 
