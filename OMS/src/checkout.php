@@ -15,7 +15,6 @@ $totalAmount = 0;
 foreach ($cartItems as $item) {
     $totalAmount += $item['Price'] * $item['Quantity'];
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -38,7 +37,7 @@ foreach ($cartItems as $item) {
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">Checkout</h2>
-    
+
     <!-- Cart Items -->
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
@@ -60,23 +59,30 @@ foreach ($cartItems as $item) {
             <?php endforeach; ?>
         </tbody>
     </table>
-    
+
     <div class="d-flex justify-content-between">
         <h4>Total: ₱<?php echo number_format($totalAmount, 2); ?></h4>
     </div>
 
     <!-- Checkout Form -->
     <form method="POST" action="../process/process_checkout.php">
-    <div class="mb-3">
-        <label for="name" class="form-label">Full Name</label>
-        <input type="text" class="form-control" id="name" name="name" required>
-    </div>
-    <div class="mb-3">
-        <label for="contactDetails" class="form-label">Contact Details (Phone/Email)</label>
-        <input type="text" class="form-control" id="contactDetails" name="contactDetails" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Place Order</button>
-</form>
+        <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="contactDetails" class="form-label">Contact Details (Phone/Email)</label>
+            <input type="text" class="form-control" id="contactDetails" name="contactDetails" required>
+        </div>
+        <div class="mb-3">
+            <label for="paymentType" class="form-label">Payment Type</label>
+            <select class="form-select" id="paymentType" name="paymentType" required>
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Place Order</button>
+    </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

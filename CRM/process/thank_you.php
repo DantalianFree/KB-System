@@ -45,7 +45,7 @@ unset($_SESSION['success']);
         <p>You can now close this page.</p>
         
         <!-- Button to view feedback -->
-        <a href="view_feedback.php" class="btn btn-success mt-4">View Your Feedback</a>
+        <a href="../src/view_feedback.php" class="btn btn-success mt-4">View Your Feedback</a>
 
         <!-- Optional: Button to submit another feedback -->
         <a href="../forms/feedback_form.php" class="btn btn-primary mt-2">Submit Another Feedback</a>

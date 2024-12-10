@@ -84,7 +84,6 @@ $activities = [
         .notification-box ul li:last-child {
             border-bottom: none;
         }
-        /* Sidebar Styles */
         .sidebar {
             height: 100%;
             position: fixed;
@@ -96,16 +95,14 @@ $activities = [
             padding-top: 20px;
             transition: all 0.3s ease;
             z-index: 1000;
-            visibility: hidden; /* Initially hidden */
-            opacity: 0; /* Fade out when hidden */
+            visibility: hidden;
+            opacity: 0;
         }
-
         .sidebar.open {
             visibility: visible;
             opacity: 1;
             width: 250px;
         }
-
         .sidebar a {
             color: white;
             padding: 10px 15px;
@@ -113,24 +110,18 @@ $activities = [
             display: block;
             transition: background-color 0.2s;
         }
-
         .sidebar a:hover {
             background-color: #007bff;
         }
-
-        /* Navbar Brand Styles */
         .navbar-brand {
             cursor: pointer;
             display: flex;
             align-items: center;
             font-size: 1.2rem;
         }
-
         .navbar-brand i {
-            margin-right: 10px;  /* Space between the icon and the text */
+            margin-right: 10px; 
         }
-
-        /* Close Button for Sidebar */
         .sidebar .close-btn {
             position: absolute;
             top: 15px;
@@ -140,15 +131,12 @@ $activities = [
             cursor: pointer;
             z-index: 1010;
         }
-
-        /* Sidebar Toggler Icon */
         .sidebar-toggler {
-            display: none;  /* Hide this, as the navbar brand will toggle the sidebar */
+            display: none; 
         }
-
         .content {
-            margin-top: 20px; /* Adjust this value as needed to avoid overlap */
-            margin-left: 250px;  /* Keep space for the sidebar */
+            margin-top: 20px; 
+            margin-left: 250px;  
             padding-top: 20px;
         }
     </style>
@@ -156,7 +144,6 @@ $activities = [
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <!-- Add the ID for the sidebar toggle -->
             <a class="navbar-brand" href="#" id="navbarBrand">
                 <i class="bi bi-list"></i>KB's Stopover</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -169,6 +156,9 @@ $activities = [
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="inventory_list.php">Inventory</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="reports.php">Reports</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="supplierDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -248,14 +238,6 @@ $activities = [
                 <div class="dashboard-card">
                     <h4>Low Stock Item Categories</h4>
                     <canvas id="lowStockChart"></canvas>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="dashboard-card">
-                    <h4>Recent Activities</h4>
-                    <ul id="activityFeed" class="list-unstyled">
-                        <?php echo implode('', array_map(fn($activity) => "<li>$activity</li>", $activities)); ?>
-                    </ul>
                 </div>
             </div>
         </div>

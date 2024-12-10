@@ -176,6 +176,9 @@ $lowStockItems = $lowStockResult->fetch_all(MYSQLI_ASSOC);
                     <li class="nav-item">
                         <a class="nav-link active" href="inventory_list.php">Inventory</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="reports.php">Reports</a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="supplierDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Suppliers

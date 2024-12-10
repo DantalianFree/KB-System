@@ -49,7 +49,6 @@ if ($result->num_rows > 0) {
                 <p class="card-text">Rating: <?php echo $feedback['Rating']; ?> / 5</p>
                 <p class="card-text">Comments: <?php echo $feedback['Comments']; ?></p>
                 <p class="card-text">Submitted on: <?php echo $feedback['FeedbackDate']; ?></p>
-                <a href="customer_dashboard.php" class="btn btn-primary">Go to Dashboard</a>
             </div>
         </div>
     </div>
