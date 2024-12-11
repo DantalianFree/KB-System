@@ -133,7 +133,7 @@ if ($_SESSION['usertype'] !== 'Manager' && $_SESSION['usertype'] !== 'Admin' && 
     <!-- QR Code Image -->
     <div class="qr-container">
         <p>Scan the QR code below to access the feedback form:</p>
-        <img src="../qr/313.png" alt="QR Code for Feedback Form" class="img-fluid" />
+        <img src="../qr/3132.png" alt="QR Code for Feedback Form" class="img-fluid" />
     </div>
 </div>
 
